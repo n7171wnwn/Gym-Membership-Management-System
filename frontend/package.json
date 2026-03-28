@@ -1,0 +1,23 @@
+{
+  "name": "gym-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
+    "axios": "^1.8.4",
+    "echarts": "^6.0.0",
+    "element-plus": "^2.13.6",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.13",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.6.2",
+    "vite": "^4.5.14"
+  }
+}

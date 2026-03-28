@@ -1,0 +1,13 @@
+﻿<view class="container">
+  <view class="card">总消费：{{dashboard.totalRevenue || 0}}</view>
+  <view class="card">3天内到期：{{dashboard.expiringSoon || 0}}</view>
+
+  <view class="title">课程列表</view>
+  <block wx:for="{{courses}}" wx:key="id">
+    <view class="course">
+      <view>{{item.title}}（余量：{{item.remainingSlots}}）</view>
+      <view>{{item.slot}}</view>
+      <button size="mini" data-id="{{item.id}}" bindtap="book">预约</button>
+    </view>
+  </block>
+</view>

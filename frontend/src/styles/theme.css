@@ -1,0 +1,30 @@
+:root {
+  --gym-primary: #0e7490;
+  --gym-primary-dark: #0f766e;
+  --gym-sidebar: #0c4a6e;
+  --gym-sidebar-text: #e0f2fe;
+  --gym-bg: #f0f9ff;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: var(--gym-bg);
+}
+
+.gym-page-card {
+  border-radius: 10px;
+}
+
+.el-button--primary {
+  --el-button-bg-color: var(--gym-primary);
+  --el-button-border-color: var(--gym-primary);
+  --el-button-hover-bg-color: var(--gym-primary-dark);
+  --el-button-hover-border-color: var(--gym-primary-dark);
+}
