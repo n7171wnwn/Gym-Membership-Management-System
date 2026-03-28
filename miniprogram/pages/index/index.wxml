@@ -1,0 +1,49 @@
+<scroll-view scroll-y class="page">
+  <view class="hero">
+    <view class="hero-title">活力健身</view>
+    <view class="hero-sub">今天也要动起来</view>
+  </view>
+
+  <view class="card">
+    <view class="title-lg mb-16">公告</view>
+    <view wx:for="{{announcements}}" wx:key="title" class="ann-item">
+      <view class="ann-title">{{item.title}}</view>
+      <view class="sub ann-content">{{item.content}}</view>
+      <view class="ann-date">{{item.date}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="row-between mb-16">
+      <text class="title-lg">热门课程</text>
+      <navigator url="/pages/courses/list" open-type="switchTab" class="link-more">全部</navigator>
+    </view>
+    <view wx:for="{{hotCourses}}" wx:key="id" class="course-row" bindtap="goDetail" data-id="{{item.id}}">
+      <view>
+        <text class="c-name">{{item.title}}</text>
+        <view class="sub mt-8">{{item.slot}} · 余 {{item.remainingSlots}}/{{item.capacity}}</view>
+      </view>
+      <text class="tag">{{item.catTxt}}</text>
+    </view>
+    <view wx:if="{{!hotCourses.length}}" class="sub">暂无课程</view>
+  </view>
+
+  <view class="quick">
+    <navigator url="/pages/mine/bookings" class="q-item">
+      <text class="q-icon">约</text>
+      <text>我的预约</text>
+    </navigator>
+    <navigator url="/pages/mine/card" class="q-item">
+      <text class="q-icon">卡</text>
+      <text>我的卡</text>
+    </navigator>
+    <navigator url="/pages/courses/list" open-type="switchTab" class="q-item">
+      <text class="q-icon">课</text>
+      <text>去约课</text>
+    </navigator>
+    <navigator url="/pages/mine/messages" class="q-item">
+      <text class="q-icon">讯</text>
+      <text>消息</text>
+    </navigator>
+  </view>
+</scroll-view>

@@ -36,15 +36,19 @@ public class SecurityConfig {
             .and()
             .authorizeRequests()
             .mvcMatchers("/gym/auth/**", "/gym/health").permitAll()
+            .mvcMatchers(HttpMethod.GET, "/gym/announcements").permitAll()
+            .mvcMatchers(HttpMethod.GET, "/gym/courses").permitAll()
 
             .mvcMatchers(HttpMethod.DELETE, "/gym/manage/**").hasRole("ADMIN")
 
             .mvcMatchers("/gym/manage/**").hasAnyRole("ADMIN", "RECEPTION", "COACH")
 
-            .mvcMatchers(HttpMethod.GET, "/gym/courses", "/gym/dashboard", "/gym/stats/**")
+            .mvcMatchers(HttpMethod.GET, "/gym/dashboard", "/gym/stats/**")
             .hasAnyRole("ADMIN", "RECEPTION", "COACH", "MEMBER")
 
             .mvcMatchers(HttpMethod.POST, "/gym/bookings").hasAnyRole("ADMIN", "RECEPTION", "COACH", "MEMBER")
+
+            .mvcMatchers("/gym/member/**").hasRole("MEMBER")
 
             .mvcMatchers("/gym/**").hasAnyRole("ADMIN", "RECEPTION")
 

@@ -1,0 +1,37 @@
+<view class="header card">
+  <view class="avatar">{{ nameInitial }}</view>
+  <view>
+    <view class="title-lg">{{ profile.name || '未登录' }}</view>
+    <view class="sub">{{ profile.phone || '点击登录享受完整服务' }}</view>
+  </view>
+</view>
+
+<view wx:if="{{!logged}}" class="card">
+  <button class="btn-main btn-block" bindtap="goLogin">登录 / 绑定</button>
+</view>
+
+<view wx:if="{{logged}}" class="menu">
+  <navigator url="/pages/mine/bookings" class="menu-item row-between">
+    <text>我的预约</text>
+    <text class="arrow">›</text>
+  </navigator>
+  <navigator url="/pages/mine/card" class="menu-item row-between">
+    <text>会员卡</text>
+    <text class="arrow">›</text>
+  </navigator>
+  <navigator url="/pages/mine/health" class="menu-item row-between">
+    <text>体测数据</text>
+    <text class="arrow">›</text>
+  </navigator>
+  <navigator url="/pages/mine/consumptions" class="menu-item row-between">
+    <text>历史消费</text>
+    <text class="arrow">›</text>
+  </navigator>
+  <navigator url="/pages/mine/messages" class="menu-item row-between">
+    <text>消息提醒</text>
+    <text class="arrow">›</text>
+  </navigator>
+  <view class="menu-item row-between" bindtap="logout">
+    <text>退出登录</text>
+  </view>
+</view>

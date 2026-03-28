@@ -1,0 +1,19 @@
+<view class="page-pad">
+  <view class="logo-area">
+    <view class="logo">活力健身</view>
+    <view class="sub">会员端 · 清爽约课</view>
+  </view>
+
+  <button class="btn-green btn-block" bindtap="wxQuickLogin" loading="{{wxLoading}}">微信快捷登录</button>
+  <view class="hint sub">若已配置 app-secret 将自动登录；否则请使用下方手机号绑定</view>
+
+  <view class="divider">或 手机号绑定（预留手机号）</view>
+  <input class="input" type="number" maxlength="11" placeholder="请输入馆内登记的手机号" bindinput="onPhone" value="{{phone}}" />
+
+  <button class="btn-main btn-block" bindtap="bindPhone" loading="{{bindLoading}}">一键绑定并登录</button>
+
+  <view class="divider">开发调试：账号密码</view>
+  <input class="input" placeholder="用户名 member" bindinput="onUser" value="{{username}}" />
+  <input class="input" password placeholder="密码 member123" bindinput="onPass" value="{{password}}" />
+  <button class="btn-line btn-block" bindtap="pwdLogin" loading="{{pwdLoading}}">密码登录</button>
+</view>

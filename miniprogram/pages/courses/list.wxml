@@ -1,0 +1,21 @@
+<view class="toolbar card-flat">
+  <picker mode="selector" range="{{catOptions}}" range-key="label" value="{{catIndex}}" bindchange="onCat">
+    <view class="picker-line">分类：{{catOptions[catIndex].label}}</view>
+  </picker>
+  <input class="coach-in" placeholder="教练姓名筛选" bindinput="onCoachInput" value="{{coachKw}}" />
+</view>
+
+<scroll-view scroll-y class="list">
+  <view wx:for="{{filtered}}" wx:key="id" class="card course-card" bindtap="goDetail" data-id="{{item.id}}">
+    <view class="row-between">
+      <text class="c-title">{{item.title}}</text>
+      <text class="tag">{{item.catTxt}}</text>
+    </view>
+    <view class="sub mt-8">{{item.slot}}</view>
+    <view class="row-between mt-16">
+      <text class="sub">教练 {{item.coachName}}</text>
+      <text class="remain">剩余 {{item.remainingSlots}}/{{item.capacity}}</text>
+    </view>
+  </view>
+  <view wx:if="{{!filtered.length}}" class="empty sub">无匹配课程</view>
+</scroll-view>

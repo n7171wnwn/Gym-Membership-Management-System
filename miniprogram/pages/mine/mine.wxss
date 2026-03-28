@@ -1,0 +1,45 @@
+.header {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  margin: 24rpx;
+}
+
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ff8c42, #ff6b1a);
+  color: #fff;
+  font-size: 48rpx;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu {
+  margin: 24rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 8rpx 32rpx rgba(43, 182, 115, 0.1);
+}
+
+.menu-item {
+  padding: 32rpx 28rpx;
+  border-bottom: 1rpx solid #f0fdf4;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.arrow {
+  color: #9ca3af;
+  font-size: 40rpx;
+}
+
+.btn-block {
+  width: 100%;
+}

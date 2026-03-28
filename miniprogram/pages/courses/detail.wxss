@@ -1,0 +1,30 @@
+.page-pad {
+  padding: 24rpx;
+}
+
+.hero-card {
+  margin-top: 0;
+}
+
+.tag-wrap {
+  margin-top: 16rpx;
+}
+
+.tag.off {
+  background: #fee2e2;
+  color: #b91c1c;
+  margin-left: 12rpx;
+}
+
+.btn-block {
+  width: 100%;
+  margin-top: 32rpx;
+}
+
+.mt-btn {
+  margin-top: 24rpx;
+}
+
+.mt-16 {
+  margin-top: 16rpx;
+}

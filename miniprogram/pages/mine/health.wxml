@@ -1,0 +1,24 @@
+<scroll-view scroll-y class="page">
+  <view class="card">
+    <view class="title-lg">当前记录</view>
+    <view wx:if="{{parsed.note}}" class="sub mt-16">备注：{{parsed.note}}</view>
+    <view class="row-line">身高 <text class="val">{{parsed.height || '—'}} cm</text></view>
+    <view class="row-line">体重 <text class="val">{{parsed.weight || '—'}} kg</text></view>
+    <view class="row-line">体脂 <text class="val">{{parsed.bodyFat || '—'}} %</text></view>
+    <view wx:if="{{parsed.updatedAt}}" class="sub mt-16">更新于 {{parsed.updatedAt}}</view>
+  </view>
+
+  <view class="card">
+    <view class="title-lg">更新体测</view>
+    <input class="input" type="digit" placeholder="身高 cm" bindinput="onH" value="{{height}}" />
+    <input class="input" type="digit" placeholder="体重 kg" bindinput="onW" value="{{weight}}" />
+    <input class="input" type="digit" placeholder="体脂 %" bindinput="onF" value="{{bodyFat}}" />
+    <input class="input" placeholder="备注（可选）" bindinput="onNote" value="{{note}}" />
+    <button class="btn-main btn-block" bindtap="save" loading="{{saving}}">保存</button>
+  </view>
+
+  <view class="card">
+    <view class="title-lg">历史消费</view>
+    <navigator url="/pages/mine/consumptions" class="link">查看全部消费记录 ›</navigator>
+  </view>
+</scroll-view>

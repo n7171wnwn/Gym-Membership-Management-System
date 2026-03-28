@@ -20,6 +20,10 @@ public class JwtService {
     }
 
     public String generateToken(String username, String role, Long coachId) {
+        return generateToken(username, role, coachId, null);
+    }
+
+    public String generateToken(String username, String role, Long coachId, Long memberId) {
         Date now = new Date();
         Date expire = new Date(now.getTime() + 24 * 60 * 60 * 1000);
         io.jsonwebtoken.JwtBuilder b = Jwts.builder()
@@ -29,6 +33,9 @@ public class JwtService {
             .setExpiration(expire);
         if (coachId != null) {
             b.claim("coachId", coachId);
+        }
+        if (memberId != null) {
+            b.claim("memberId", memberId);
         }
         return b.signWith(key, SignatureAlgorithm.HS256).compact();
     }

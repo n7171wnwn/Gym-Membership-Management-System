@@ -1,0 +1,15 @@
+<scroll-view scroll-y class="page">
+  <view wx:for="{{cards}}" wx:key="id" class="card c-card">
+    <view class="row-between">
+      <text class="ctype">{{ item.typeTxt }}</text>
+      <text class="cstat">{{ item.statusTxt }}</text>
+    </view>
+    <view class="sub mt-16">有效期 {{item.validFrom}} ~ {{item.validTo}}</view>
+    <view wx:if="{{item.cardType === 'COUNT'}}" class="remain-big">剩余次数 {{item.remainingTimes}}</view>
+    <view wx:else class="remain-big">余额 {{item.balance}} 元</view>
+  </view>
+  <view class="card tip">
+    <view class="title-lg">续费说明</view>
+    <view class="sub mt-16">续费、挂失等业务请前往前台办理，或使用管理端由工作人员代办。</view>
+  </view>
+</scroll-view>

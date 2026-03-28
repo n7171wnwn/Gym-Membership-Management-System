@@ -1,0 +1,10 @@
+<scroll-view scroll-y class="page">
+  <view wx:for="{{list}}" wx:key="id" class="card row-between vcenter">
+    <view>
+      <view class="typ">{{item.type || '消费'}}</view>
+      <view class="sub">{{item.timeTxt}}</view>
+    </view>
+    <view class="amt {{item.amtCls}}">{{item.amtTxt}}</view>
+  </view>
+  <view wx:if="{{!list.length}}" class="sub empty">暂无消费记录</view>
+</scroll-view>

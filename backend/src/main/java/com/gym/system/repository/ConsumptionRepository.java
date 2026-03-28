@@ -16,4 +16,6 @@ public interface ConsumptionRepository extends JpaRepository<Consumption, Long> 
     @Query(value = "select date_format(c.created_at, '%Y-%m') as ym, coalesce(sum(c.amount),0) " +
         "from consumption c group by ym order by ym", nativeQuery = true)
     List<Object[]> sumAmountGroupByMonth();
+
+    List<Consumption> findByMember_IdOrderByCreatedAtDesc(Long memberId);
 }

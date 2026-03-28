@@ -22,6 +22,7 @@ E:\Graduation Project\Gym Membership Management System\backend\src\main\java\com
 E:\Graduation Project\Gym Membership Management System\backend\src\main\java\com\gym\system\config\RabbitConfig.java
 E:\Graduation Project\Gym Membership Management System\backend\src\main\java\com\gym\system\repository\SystemMessageRepository.java
 E:\Graduation Project\Gym Membership Management System\backend\src\main\java\com\gym\system\service\GymService.java
+E:\Graduation Project\Gym Membership Management System\backend\src\main\java\com\gym\system\service\WxMiniAuthService.java
 E:\Graduation Project\Gym Membership Management System\backend\src\main\java\com\gym\system\messaging\LocalSyncPublisher.java
 E:\Graduation Project\Gym Membership Management System\backend\src\main\java\com\gym\system\controller\AuthController.java
 E:\Graduation Project\Gym Membership Management System\backend\src\main\java\com\gym\system\repository\SysUserRepository.java
@@ -35,6 +36,7 @@ E:\Graduation Project\Gym Membership Management System\backend\src\main\java\com
 E:\Graduation Project\Gym Membership Management System\backend\src\main\java\com\gym\system\entity\Booking.java
 E:\Graduation Project\Gym Membership Management System\backend\src\main\java\com\gym\system\entity\Consumption.java
 E:\Graduation Project\Gym Membership Management System\backend\src\main\java\com\gym\system\repository\ConsumptionRepository.java
+E:\Graduation Project\Gym Membership Management System\backend\src\main\java\com\gym\system\controller\MemberPortalController.java
 E:\Graduation Project\Gym Membership Management System\backend\src\main\java\com\gym\system\entity\Course.java
 E:\Graduation Project\Gym Membership Management System\backend\src\main\java\com\gym\system\dto\MemberExportRow.java
 E:\Graduation Project\Gym Membership Management System\backend\src\main\java\com\gym\system\entity\MembershipCard.java

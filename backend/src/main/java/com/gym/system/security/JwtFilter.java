@@ -40,6 +40,10 @@ public class JwtFilter extends OncePerRequestFilter {
                 if (cid instanceof Number) {
                     request.setAttribute("coachId", ((Number) cid).longValue());
                 }
+                Object mid = claims.get("memberId");
+                if (mid instanceof Number) {
+                    request.setAttribute("memberId", ((Number) mid).longValue());
+                }
             } catch (Exception ignored) {
             }
         }

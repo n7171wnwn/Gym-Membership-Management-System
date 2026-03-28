@@ -1,0 +1,12 @@
+<scroll-view scroll-y class="page">
+  <view wx:for="{{list}}" wx:key="id" class="card item">
+    <view class="row-between">
+      <text class="cname">{{item.course.title}}</text>
+      <text class="st {{item.stCls}}">{{item.stTxt}}</text>
+    </view>
+    <view class="sub mt-8">{{item.course.slot}}</view>
+    <view class="sub">申请时间 {{item.timeTxt}}</view>
+    <button wx:if="{{item.canCancel}}" class="btn-cancel" size="mini" bindtap="cancelOne" data-id="{{item.id}}">一键取消</button>
+  </view>
+  <view wx:if="{{!list.length}}" class="sub empty">暂无预约记录</view>
+</scroll-view>

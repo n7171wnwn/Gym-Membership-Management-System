@@ -1,0 +1,12 @@
+<scroll-view scroll-y class="page">
+  <view wx:for="{{list}}" wx:key="id" class="card msg">
+    <view class="row-between">
+      <text class="tit">{{item.title}}</text>
+      <view wx:if="{{!item.readFlag}}" class="dot"></view>
+    </view>
+    <view class="type-tag">{{item.typeTxt}}</view>
+    <view class="content">{{item.content}}</view>
+    <view class="sub">{{item.timeTxt}}</view>
+  </view>
+  <view wx:if="{{!list.length}}" class="sub empty">暂无消息（课程提醒、到期提醒由系统推送）</view>
+</scroll-view>

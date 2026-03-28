@@ -6,9 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByPhone(String phone);
+
+    Optional<Member> findByPhone(String phone);
 
     @Query("select m from Member m where " +
         "(:kw is null or :kw = '' or m.name like concat('%', :kw, '%') or m.phone like concat('%', :kw, '%')) and " +

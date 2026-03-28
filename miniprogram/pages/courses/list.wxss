@@ -1,0 +1,48 @@
+.card-flat {
+  margin: 16rpx 24rpx;
+  padding: 20rpx 24rpx;
+  background: #fff;
+  border-radius: 20rpx;
+}
+
+.toolbar {
+  box-shadow: 0 4rpx 20rpx rgba(43, 182, 115, 0.1);
+}
+
+.picker-line {
+  padding: 12rpx 0;
+  color: #1d8a5a;
+  font-weight: 600;
+}
+
+.coach-in {
+  margin-top: 12rpx;
+  border: 1rpx solid #d1fae5;
+  border-radius: 16rpx;
+  padding: 16rpx 20rpx;
+  background: #f9fffb;
+}
+
+.list {
+  height: calc(100vh - 200rpx);
+  padding-bottom: 40rpx;
+}
+
+.course-card {
+  margin-top: 0;
+}
+
+.c-title {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.remain {
+  color: #ff7a00;
+  font-weight: 600;
+}
+
+.empty {
+  text-align: center;
+  padding: 80rpx;
+}

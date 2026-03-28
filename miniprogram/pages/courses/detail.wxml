@@ -1,0 +1,17 @@
+<view wx:if="{{course}}" class="page-pad">
+  <view class="card hero-card">
+    <view class="title-lg">{{course.title}}</view>
+    <view class="tag-wrap">
+      <text class="tag">{{catTxt}}</text>
+      <text wx:if="{{course.enabled === false}}" class="tag off">已下架</text>
+    </view>
+    <view class="sub mt-16">时间：{{course.slot}}</view>
+    <view class="sub">教练：{{coachName}}</view>
+    <view class="sub">名额：剩余 {{course.remainingSlots}} / 上限 {{course.capacity}}</view>
+  </view>
+
+  <button class="btn-main btn-block" bindtap="bookOne" disabled="{{booking || course.remainingSlots <= 0}}">
+    {{ course.remainingSlots <= 0 ? '名额已满' : '一键预约' }}
+  </button>
+  <button wx:if="{{loggedIn}}" class="btn-green btn-block mt-btn" bindtap="goMy">我的预约</button>
+</view>

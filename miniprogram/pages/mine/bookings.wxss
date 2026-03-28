@@ -1,0 +1,45 @@
+.page {
+  height: 100vh;
+  padding-bottom: 40rpx;
+}
+
+.item {
+  position: relative;
+}
+
+.st {
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.st-pending {
+  color: #d97706;
+}
+
+.st-ok {
+  color: #2bb673;
+}
+
+.st-off {
+  color: #9ca3af;
+}
+
+.btn-cancel {
+  margin-top: 20rpx;
+  background: #fef3c7;
+  color: #b45309;
+  border: none;
+}
+
+.empty {
+  text-align: center;
+  padding: 80rpx;
+}
+
+.mt-8 {
+  margin-top: 8rpx;
+}
+
+.cname {
+  font-weight: 700;
+}

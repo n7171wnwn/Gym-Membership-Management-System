@@ -1,5 +1,7 @@
 server:
   port: 8080
+  # 监听所有网卡，手机/局域网用本机 IPv4 访问；仅 127.0.0.1 时外网卡访问会 connection refused
+  address: 0.0.0.0
   servlet:
     context-path: /api
 
@@ -30,3 +32,7 @@ app:
   rabbitmq-enabled: false
   # 启动时若库中不存在演示标记会员(手机19988880001)，则自动写入一批示例数据；正式环境请改为 false
   demo-seed: true
+  # 小程序 code2session（留空则仅支持手机号绑定登录）
+  wx-miniapp:
+    app-id: ${WX_MINIAPP_APPID:}
+    app-secret: ${WX_MINIAPP_SECRET:}

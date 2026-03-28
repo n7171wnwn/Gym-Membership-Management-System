@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface SystemMessageRepository extends JpaRepository<SystemMessage, Long> {
     List<SystemMessage> findAllByOrderByCreatedAtDesc();
+
+    List<SystemMessage> findByMember_IdOrderByCreatedAtDesc(Long memberId);
 }

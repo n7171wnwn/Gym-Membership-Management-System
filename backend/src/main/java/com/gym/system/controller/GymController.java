@@ -22,6 +22,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +37,24 @@ public class GymController {
 
     @GetMapping("/dashboard")
     public Map<String, Object> dashboard() { return gymService.dashboard(); }
+
+    /** 小程序首页公告，无需登录 */
+    @GetMapping("/announcements")
+    public List<Map<String, Object>> announcements() {
+        List<Map<String, Object>> list = new ArrayList<>();
+        list.add(annPublic("欢迎来到活力健身", "新用户办卡享 8 折优惠，详询前台。", "2026-03-01"));
+        list.add(annPublic("春季燃脂训练营", "4 月起每周三晚团课，欢迎预约体验。", "2026-03-15"));
+        list.add(annPublic("场地维护通知", "跑步机区域将例行维护，请错峰使用。", "2026-03-20"));
+        return list;
+    }
+
+    private static Map<String, Object> annPublic(String title, String content, String date) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("title", title);
+        m.put("content", content);
+        m.put("date", date);
+        return m;
+    }
 
     @GetMapping("/members")
     public List<Member> members() { return gymService.listMembers(); }

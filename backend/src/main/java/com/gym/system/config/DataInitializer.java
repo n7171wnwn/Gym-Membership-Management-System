@@ -64,6 +64,15 @@ public class DataInitializer {
                 c1.setEnabled(true);
                 courseRepository.save(c1);
             }
+
+            sysUserRepository.findByUsername("member").ifPresent(u ->
+                memberRepository.findByPhone("13800000001").ifPresent(m -> {
+                    if (u.getLinkedMemberId() == null) {
+                        u.setLinkedMemberId(m.getId());
+                        sysUserRepository.save(u);
+                    }
+                })
+            );
         };
     }
 

@@ -1,5 +1,0 @@
-﻿<view class="container">
-  <input placeholder="用户名" bindinput="onUsernameInput" value="{{username}}" />
-  <input placeholder="密码" password="true" bindinput="onPasswordInput" value="{{password}}" />
-  <button bindtap="login">登录</button>
-</view>

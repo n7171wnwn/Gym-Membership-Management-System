@@ -1,4 +1,0 @@
-﻿.container { padding: 24rpx; }
-.card { background: #fff; border-radius: 8rpx; padding: 16rpx; margin-bottom: 12rpx; }
-.title { font-weight: bold; margin: 16rpx 0; }
-.course { background: #fff; border-radius: 8rpx; padding: 16rpx; margin-bottom: 10rpx; }
