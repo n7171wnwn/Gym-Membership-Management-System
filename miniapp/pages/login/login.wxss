@@ -1,0 +1,41 @@
+.card {
+  margin: 12px;
+  padding: 12px;
+  background: #fff;
+  border-radius: 10px;
+}
+
+.ipt {
+  background: #f8fafc;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.mt {
+  margin-top: 10px;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.tab.on {
+  background: #0ea5e9;
+  color: #fff;
+}
+
+.btn {
+  margin-top: 10px;
+}
+

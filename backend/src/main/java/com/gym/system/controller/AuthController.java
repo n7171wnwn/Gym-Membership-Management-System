@@ -7,6 +7,7 @@ import com.gym.system.repository.MemberRepository;
 import com.gym.system.repository.SysUserRepository;
 import com.gym.system.security.JwtService;
 import com.gym.system.service.WxMiniAuthService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,13 +23,16 @@ public class AuthController {
     private final SysUserRepository sysUserRepository;
     private final MemberRepository memberRepository;
     private final WxMiniAuthService wxMiniAuthService;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthController(JwtService jwtService, SysUserRepository sysUserRepository,
-                         MemberRepository memberRepository, WxMiniAuthService wxMiniAuthService) {
+                         MemberRepository memberRepository, WxMiniAuthService wxMiniAuthService,
+                         PasswordEncoder passwordEncoder) {
         this.jwtService = jwtService;
         this.sysUserRepository = sysUserRepository;
         this.memberRepository = memberRepository;
         this.wxMiniAuthService = wxMiniAuthService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/login")
@@ -37,7 +41,7 @@ public class AuthController {
         String pass = request.getPassword();
 
         SysUser u = sysUserRepository.findByUsername(user).orElse(null);
-        if (u == null || !pass.equals(u.getPassword())) {
+        if (u == null || !verifyAndUpgradePasswordIfNeeded(u, pass)) {
             throw new RuntimeException("用户名或密码错误");
         }
         String jwtRole = "ROLE_" + u.getRole();
@@ -52,6 +56,24 @@ public class AuthController {
         map.put("coachId", coachId);
         map.put("memberId", memberId);
         return map;
+    }
+
+    /**
+     * 兼容历史明文密码：若检测到是明文且校验通过，则自动升级为 BCrypt。
+     */
+    private boolean verifyAndUpgradePasswordIfNeeded(SysUser u, String raw) {
+        String stored = u.getPassword();
+        if (stored == null) return false;
+
+        boolean looksBcrypt = stored.startsWith("$2a$") || stored.startsWith("$2b$") || stored.startsWith("$2y$");
+        if (looksBcrypt) {
+            return passwordEncoder.matches(raw, stored);
+        }
+        // 旧库：明文对比
+        if (!raw.equals(stored)) return false;
+        u.setPassword(passwordEncoder.encode(raw));
+        sysUserRepository.save(u);
+        return true;
     }
 
     /**
@@ -74,7 +96,8 @@ public class AuthController {
         SysUser u = sysUserRepository.findByUsername(uname).orElseGet(SysUser::new);
         u.setUsername(uname);
         if (u.getId() == null && (u.getPassword() == null || u.getPassword().isEmpty())) {
-            u.setPassword(java.util.UUID.randomUUID().toString());
+            // 小程序绑定账号不提供密码登录能力，仍然用加密后的随机串存储
+            u.setPassword(passwordEncoder.encode(java.util.UUID.randomUUID().toString()));
         }
         u.setRole("MEMBER");
         u.setDisplayName(m.getName());

@@ -11,6 +11,7 @@ import com.gym.system.repository.SysUserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 
@@ -21,7 +22,8 @@ public class DataInitializer {
         MemberRepository memberRepository,
         CourseRepository courseRepository,
         CoachRepository coachRepository,
-        SysUserRepository sysUserRepository
+        SysUserRepository sysUserRepository,
+        PasswordEncoder passwordEncoder
     ) {
         return args -> {
             Coach coach;
@@ -35,11 +37,11 @@ public class DataInitializer {
             }
 
             if (sysUserRepository.count() == 0) {
-                seedUser(sysUserRepository, "admin", "admin123", "ADMIN", "系统管理员", null);
-                seedUser(sysUserRepository, "reception", "reception123", "RECEPTION", "前台", null);
-                seedUser(sysUserRepository, "coach", "coach123", "COACH", "教练账号", coach.getId());
-                seedUser(sysUserRepository, "root", "hjj060618", "ADMIN", "超级管理员", null);
-                seedUser(sysUserRepository, "member", "member123", "MEMBER", "测试会员", null);
+                seedUser(sysUserRepository, passwordEncoder, "admin", "admin123", "ADMIN", "系统管理员", null);
+                seedUser(sysUserRepository, passwordEncoder, "reception", "reception123", "RECEPTION", "前台", null);
+                seedUser(sysUserRepository, passwordEncoder, "coach", "coach123", "COACH", "教练账号", coach.getId());
+                seedUser(sysUserRepository, passwordEncoder, "root", "hjj060618", "ADMIN", "超级管理员", null);
+                seedUser(sysUserRepository, passwordEncoder, "member", "member123", "MEMBER", "测试会员", null);
             }
 
             if (memberRepository.count() == 0) {
@@ -76,10 +78,11 @@ public class DataInitializer {
         };
     }
 
-    private static void seedUser(SysUserRepository repo, String u, String p, String role, String name, Long coachId) {
+    private static void seedUser(SysUserRepository repo, PasswordEncoder passwordEncoder,
+                                 String u, String p, String role, String name, Long coachId) {
         SysUser s = new SysUser();
         s.setUsername(u);
-        s.setPassword(p);
+        s.setPassword(passwordEncoder.encode(p));
         s.setRole(role);
         s.setDisplayName(name);
         s.setLinkedCoachId(coachId);

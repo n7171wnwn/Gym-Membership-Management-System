@@ -1,0 +1,24 @@
+<view class="card">
+  <view style="font-weight:600;margin-bottom:10px;">登录</view>
+
+  <view class="tabs">
+    <view class="tab {{mode==='password' ? 'on' : ''}}" bindtap="setModePassword">密码登录</view>
+    <view class="tab {{mode==='phone' ? 'on' : ''}}" bindtap="setModePhone">手机号绑定</view>
+  </view>
+
+  <view wx:if="{{mode==='password'}}">
+    <input class="ipt" placeholder="用户名（如 member）" value="{{username}}" bindinput="onUsername" />
+    <input class="ipt mt" placeholder="密码（如 member123）" password value="{{password}}" bindinput="onPassword" />
+    <button class="btn" type="primary" loading="{{loading}}" bindtap="loginByPassword">登录</button>
+  </view>
+
+  <view wx:elif="{{mode==='phone'}}">
+    <input class="ipt" placeholder="请输入健身房登记手机号" value="{{phone}}" bindinput="onPhone" />
+    <button class="btn" type="primary" loading="{{loading}}" bindtap="bindPhone">登录</button>
+  </view>
+
+  <view wx:if="{{token}}" style="margin-top:10px;font-size:12px;color:#64748b;word-break:break-all;">
+    token 已获取（示例）：{{token}}
+  </view>
+</view>
+

@@ -10,6 +10,8 @@ import com.gym.system.entity.Member;
 import com.gym.system.entity.ReminderLog;
 import com.gym.system.entity.SyncLog;
 import com.gym.system.service.GymService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -117,9 +120,17 @@ public class GymController {
     public List<Booking> bookings() { return gymService.listBookings(); }
 
     @PostMapping("/bookings")
-    public Booking addBooking(@RequestBody Map<String, Long> body) {
+    public Booking addBooking(@RequestBody Map<String, Long> body, Authentication authentication, HttpServletRequest request) {
         Long memberId = body.get("memberId");
         Long courseId = body.get("courseId");
+        if (authentication != null && authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MEMBER"))) {
+            Object mid = request.getAttribute("memberId");
+            if (!(mid instanceof Long)) {
+                throw new RuntimeException("会员身份无效，请重新登录");
+            }
+            // 会员端预约必须绑定到自身，忽略前端传入 memberId，避免越权代约
+            memberId = (Long) mid;
+        }
         return gymService.createBooking(memberId, courseId);
     }
 

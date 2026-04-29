@@ -16,6 +16,7 @@ import com.gym.system.repository.MemberRepository;
 import com.gym.system.repository.SysUserRepository;
 import com.gym.system.repository.SystemMessageRepository;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,12 +38,14 @@ public class ManageService {
     private final SysUserRepository sysUserRepository;
     private final GymService gymService;
     private final ConsumptionRepository consumptionRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public ManageService(MemberRepository memberRepository, MembershipCardRepository membershipCardRepository,
                          CourseRepository courseRepository, CoachRepository coachRepository,
                          BookingRepository bookingRepository, SystemMessageRepository systemMessageRepository,
                          SysUserRepository sysUserRepository, GymService gymService,
-                         ConsumptionRepository consumptionRepository) {
+                         ConsumptionRepository consumptionRepository,
+                         PasswordEncoder passwordEncoder) {
         this.memberRepository = memberRepository;
         this.membershipCardRepository = membershipCardRepository;
         this.courseRepository = courseRepository;
@@ -52,6 +55,7 @@ public class ManageService {
         this.sysUserRepository = sysUserRepository;
         this.gymService = gymService;
         this.consumptionRepository = consumptionRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<Member> searchMembers(String keyword, String status) {
@@ -207,11 +211,27 @@ public class ManageService {
     @Transactional
     public void changePassword(String username, String oldPass, String newPass) {
         SysUser u = sysUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("用户不存在"));
-        if (!oldPass.equals(u.getPassword())) {
+        if (!verifyPassword(u, oldPass)) {
             throw new RuntimeException("原密码错误");
         }
-        u.setPassword(newPass);
+        u.setPassword(passwordEncoder.encode(newPass));
         sysUserRepository.save(u);
+    }
+
+    /**
+     * 兼容旧库明文密码，逐步升级为 BCrypt。
+     */
+    private boolean verifyPassword(SysUser u, String raw) {
+        String stored = u.getPassword();
+        if (stored == null) return false;
+        boolean looksBcrypt = stored.startsWith("$2a$") || stored.startsWith("$2b$") || stored.startsWith("$2y$");
+        if (looksBcrypt) {
+            return passwordEncoder.matches(raw, stored);
+        }
+        if (!raw.equals(stored)) return false;
+        u.setPassword(passwordEncoder.encode(raw));
+        sysUserRepository.save(u);
+        return true;
     }
 
     public List<Course> coursesForCoach(Long coachId) {

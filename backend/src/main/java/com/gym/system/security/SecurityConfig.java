@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -38,15 +38,24 @@ public class SecurityConfig {
             .mvcMatchers("/gym/auth/**", "/gym/health").permitAll()
             .mvcMatchers(HttpMethod.GET, "/gym/announcements").permitAll()
             .mvcMatchers(HttpMethod.GET, "/gym/courses").permitAll()
+            .mvcMatchers(HttpMethod.GET, "/gym/coaches").permitAll()
 
             .mvcMatchers(HttpMethod.DELETE, "/gym/manage/**").hasRole("ADMIN")
 
-            .mvcMatchers("/gym/manage/**").hasAnyRole("ADMIN", "RECEPTION", "COACH")
+            // 教练：仅允许访问与自身课程/预约相关的管理端接口（其余管理端接口禁止）
+            .mvcMatchers(HttpMethod.GET, "/gym/manage/bookings").hasRole("COACH")
+            .mvcMatchers(HttpMethod.POST, "/gym/manage/bookings/*/approve", "/gym/manage/bookings/*/cancel").hasRole("COACH")
+            .mvcMatchers(HttpMethod.GET, "/gym/manage/coach/courses").hasRole("COACH")
 
+            // 管理端：管理员/前台
+            .mvcMatchers("/gym/manage/**").hasAnyRole("ADMIN", "RECEPTION")
+
+            // 管理端看板/统计：管理员/前台/教练（会员不应访问控制台）
             .mvcMatchers(HttpMethod.GET, "/gym/dashboard", "/gym/stats/**")
-            .hasAnyRole("ADMIN", "RECEPTION", "COACH", "MEMBER")
+            .hasAnyRole("ADMIN", "RECEPTION", "COACH")
 
-            .mvcMatchers(HttpMethod.POST, "/gym/bookings").hasAnyRole("ADMIN", "RECEPTION", "COACH", "MEMBER")
+            // 预约提交：管理员/前台/会员（教练无代客预约权限）
+            .mvcMatchers(HttpMethod.POST, "/gym/bookings").hasAnyRole("ADMIN", "RECEPTION", "MEMBER")
 
             .mvcMatchers("/gym/member/**").hasRole("MEMBER")
 
@@ -71,8 +80,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    @SuppressWarnings("deprecation")
     public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
+        return new BCryptPasswordEncoder();
     }
 }
