@@ -26,23 +26,36 @@
   - 微信小程序端骨架（登录、首页公告示例）
   - JMeter 100 并发压测脚本模板
 
-## 启动步骤
+## 环境要求
 
-### 1) 启动 MySQL（推荐 Docker）
+- **JDK 8+**、**Maven 3.6+**（后端）
+- **Node.js 18+**（推荐，前端；Node 16 可能仅有依赖警告）
+- **MySQL 5.7/8.0** 或 **Docker Desktop**（数据库）
+
+## 启动步骤（按顺序）
+
+### 1) 准备数据库
+
+**方式 A：Docker（与 `docker-compose.yml` 一致，root 密码 `123456`，库名 `gym_system`）**
 
 ```bash
 docker compose up -d
 ```
 
-如果你本地已有 MySQL，执行：
+> 若本机未安装 Docker 或命令不可用，请用方式 B。
 
-```sql
-source database/init.sql;
-```
+**方式 B：本机已安装的 MySQL**
 
-并确保账号密码与 `backend/src/main/resources/application.yml` 一致。
-你也可以用环境变量覆盖：
-`MYSQL_HOST` `MYSQL_PORT` `MYSQL_DB` `MYSQL_USERNAME` `MYSQL_PASSWORD`。
+1. 创建库并导入初始化脚本（在 MySQL 客户端中执行 `database/init.sql`，或 `mysql -uroot -p < database/init.sql`）。
+2. 账号密码需与 `backend/src/main/resources/application.yml` 中一致；默认配置为：
+   - 用户：`root`
+   - 密码：`123456`
+   - 库名：`gym_system`
+   - 端口：`3306`
+
+**若本机 root 密码不是 `123456`（尤其 Windows 本机 MySQL）**，不要改代码里明文密码，用环境变量启动后端（见下节）。
+
+可用环境变量覆盖连接：`MYSQL_HOST`、`MYSQL_PORT`、`MYSQL_DB`、`MYSQL_USERNAME`、`MYSQL_PASSWORD`。
 
 ### 2) 启动后端
 
@@ -51,23 +64,34 @@ cd backend
 mvn spring-boot:run
 ```
 
-后端地址：`http://localhost:8080/api`
+**Windows PowerShell（本机 MySQL 密码与配置不一致时）**：
 
-默认登录账号：
+```powershell
+cd backend
+$env:MYSQL_PASSWORD='你的MySQL密码'
+mvn spring-boot:run
+```
 
-- 管理员：`admin / admin123`
-- 会员：`member / member123`
+- 服务地址：`http://localhost:8080/api`（已带 `context-path: /api`）
+- 启动成功日志中应出现 `Started GymMembershipApplication`。
+- 浏览器自测（可选）：`http://localhost:8080/api/gym/announcements` 能返回数据即表示接口可访问。
 
-可选环境开关：
+**默认登录账号（Web 管理端 / 接口）**
 
-- `app.redis-enabled=true` 启用 Redis 缓存
-- `app.rabbitmq-enabled=true` 启用 RabbitMQ 同步
+- 管理员：`admin` / `admin123`
+- 会员：`member` / `member123`
 
-会员导出接口（管理员）：
+**可选能力（默认关闭，见 `application.yml`）**
+
+- `app.redis-enabled=true`：启用 Redis
+- `app.rabbitmq-enabled=true`：启用 RabbitMQ
+- `app.wx-miniapp.app-id` / `app.wx-miniapp.app-secret`：微信小程序 `code2Session`（不配则小程序走手机号绑定登录）
+
+**管理员导出会员（需登录管理员）**
 
 - `GET /api/gym/members/export`
 
-### 3) 启动前端
+### 3) 启动前端（管理端页面）
 
 ```bash
 cd frontend
@@ -75,13 +99,26 @@ npm install
 npm run dev
 ```
 
-前端地址：`http://localhost:5173`
+- 地址：`http://localhost:5173`
+- 通过 Vite 代理请求后端，需先保证后端已启动。
+
+### 4) 微信小程序（可选）
+
+1. 用**微信开发者工具**打开目录 `miniprogram`（或根目录下 `miniapp` 骨架，以你实际使用的目录为准）。
+2. 在 `miniprogram/app.js`（或 `miniapp/app.js`）中，将 `globalData.apiBase` 设为：
+   - **开发者工具模拟器**：可用 `http://127.0.0.1:8080/api`
+   - **真机预览 / 真机调试**：填**运行后端的电脑在当前 Wi-Fi 下的 IPv4**（Windows：`ipconfig` 里 WLAN 对应地址），例如 `http://192.168.x.x:8080/api`，不要用已失效或其它设备的 IP。
+3. 开发者工具：**详情 → 本地设置 → 勾选「不校验合法域名、web-view（业务域名）、TLS 版本以及 HTTPS 证书」**（本地 HTTP 调试必开）。
+4. 确保手机与电脑**同一 Wi-Fi**，本机防火墙放行 **8080** 端口。
+
+**小程序登录说明**：手机号绑定接口要求该手机号已在后台登记为会员；微信一键登录需配置小程序 `app-id` / `app-secret`。
 
 ## 目录结构
 
 - `backend`：Spring Boot REST API
-- `frontend`：Vue 前端页面
+- `frontend`：Vue 管理端（Vite）
 - `database/init.sql`：数据库初始化脚本
-- `docker-compose.yml`：一键启动 MySQL
-- `miniapp`：微信小程序端骨架
+- `docker-compose.yml`：一键启动 MySQL（Docker）
+- `miniapp`：微信小程序最小骨架（用户名密码 / 手机号绑定示例）
+- `miniprogram`：微信小程序（示例页面更完整时可选用）
 - `tests/jmeter/booking-100-users.jmx`：并发压测脚本
