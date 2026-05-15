@@ -1,6 +1,6 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
-import ElementPlus from "element-plus";
+import ElementPlus, { ElMessage } from "element-plus";
 import zhCn from "element-plus/dist/locale/zh-cn.mjs";
 import "element-plus/dist/index.css";
 import App from "./App.vue";
@@ -23,8 +23,11 @@ api.interceptors.response.use(
   (err) => {
     const s = err.response?.status;
     if (s === 401 || s === 403) {
-      auth.logout();
-      router.push("/login");
+      ElMessage.error(s === 403 ? "没有权限访问该功能" : "登录已过期或无效，请重新登录");
+      if (s === 401) {
+        auth.logout();
+        router.push("/login");
+      }
     }
     return Promise.reject(err);
   }

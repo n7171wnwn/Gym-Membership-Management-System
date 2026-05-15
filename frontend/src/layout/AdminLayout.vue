@@ -22,7 +22,7 @@
         <el-menu-item index="/bookings">
           <span>预约管理</span>
         </el-menu-item>
-        <el-menu-item v-if="auth.canFullManage" index="/coaches">
+        <el-menu-item v-if="auth.canManageCoach" index="/coaches">
           <span>教练管理</span>
         </el-menu-item>
         <el-menu-item v-if="auth.canFullManage" index="/finance">

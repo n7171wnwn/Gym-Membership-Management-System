@@ -87,6 +87,33 @@ public class GymService {
     }
 
     @CacheEvict(value = {"courses", "dashboard"}, allEntries = true)
+    public Coach updateCoach(Long coachId, String name, String specialty) {
+        Coach coach = coachRepository.findById(coachId).orElseThrow(() -> new RuntimeException("教练不存在"));
+        if (name != null && !name.trim().isEmpty()) {
+            coach.setName(name.trim());
+        }
+        if (specialty != null && !specialty.trim().isEmpty()) {
+            coach.setSpecialty(specialty.trim());
+        }
+        Coach saved = coachRepository.save(coach);
+        writeSyncLog("web", "miniapp", "COACH_UPDATE", "coachId=" + saved.getId(), "SUCCESS");
+        return saved;
+    }
+
+    @CacheEvict(value = {"courses", "dashboard"}, allEntries = true)
+    public void deleteCoach(Long coachId) {
+        Coach coach = coachRepository.findById(coachId).orElseThrow(() -> new RuntimeException("教练不存在"));
+        long linkedCourses = courseRepository.findAll().stream()
+            .filter(c -> c.getCoach() != null && coachId.equals(c.getCoach().getId()))
+            .count();
+        if (linkedCourses > 0) {
+            throw new RuntimeException("该教练下仍有关联课程，不能删除");
+        }
+        coachRepository.delete(coach);
+        writeSyncLog("web", "miniapp", "COACH_DELETE", "coachId=" + coachId, "SUCCESS");
+    }
+
+    @CacheEvict(value = {"courses", "dashboard"}, allEntries = true)
     public Course createCourse(Course course, Long coachId) {
         Coach coach = coachRepository.findById(coachId).orElseThrow(() -> new RuntimeException("教练不存在"));
         course.setCoach(coach);

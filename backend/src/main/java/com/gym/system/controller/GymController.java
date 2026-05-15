@@ -12,9 +12,11 @@ import com.gym.system.entity.SyncLog;
 import com.gym.system.service.GymService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -115,6 +117,18 @@ public class GymController {
 
     @PostMapping("/coaches")
     public Coach addCoach(@RequestBody Coach coach) { return gymService.createCoach(coach); }
+
+    @PutMapping("/coaches/{id}")
+    public Coach updateCoach(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        String name = body.get("name") == null ? null : String.valueOf(body.get("name"));
+        String specialty = body.get("specialty") == null ? null : String.valueOf(body.get("specialty"));
+        return gymService.updateCoach(id, name, specialty);
+    }
+
+    @DeleteMapping("/coaches/{id}")
+    public void deleteCoach(@PathVariable Long id) {
+        gymService.deleteCoach(id);
+    }
 
     @GetMapping("/bookings")
     public List<Booking> bookings() { return gymService.listBookings(); }

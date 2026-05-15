@@ -42,12 +42,23 @@ public class SecurityConfig {
 
             .mvcMatchers(HttpMethod.DELETE, "/gym/manage/**").hasRole("ADMIN")
 
-            // 教练：仅允许访问与自身课程/预约相关的管理端接口（其余管理端接口禁止）
-            .mvcMatchers(HttpMethod.GET, "/gym/manage/bookings").hasRole("COACH")
-            .mvcMatchers(HttpMethod.POST, "/gym/manage/bookings/*/approve", "/gym/manage/bookings/*/cancel").hasRole("COACH")
+            // 预约管理：管理员/前台/教练都可访问；教练仅能查看与自身相关的数据，具体范围在控制器里再过滤。
+            // 之前这里只放了 COACH，导致管理员打开预约管理页时 GET /gym/manage/bookings 会直接 403。
+            .mvcMatchers(HttpMethod.GET, "/gym/manage/bookings").hasAnyRole("ADMIN", "RECEPTION", "COACH")
+            .mvcMatchers(HttpMethod.POST, "/gym/manage/bookings/*/approve", "/gym/manage/bookings/*/cancel").hasAnyRole("ADMIN", "RECEPTION", "COACH")
             .mvcMatchers(HttpMethod.GET, "/gym/manage/coach/courses").hasRole("COACH")
 
-            // 管理端：管理员/前台
+            // 教练管理：查询给后台运营查看，新增/编辑/删除仅管理员可做
+            .mvcMatchers(HttpMethod.GET, "/gym/coaches").hasAnyRole("ADMIN", "RECEPTION")
+            .mvcMatchers(HttpMethod.POST, "/gym/coaches").hasRole("ADMIN")
+            .mvcMatchers(HttpMethod.PUT, "/gym/coaches/**").hasRole("ADMIN")
+            .mvcMatchers(HttpMethod.DELETE, "/gym/coaches/**").hasRole("ADMIN")
+
+            // 课程管理：课程查询开放给登录后用户；新增仅管理员，编辑/下架由后台运营处理
+            .mvcMatchers(HttpMethod.POST, "/gym/courses").hasRole("ADMIN")
+            .mvcMatchers(HttpMethod.PUT, "/gym/manage/courses/**").hasAnyRole("ADMIN", "RECEPTION")
+
+            // 管理端：管理员/前台（教练的预约/课程自有接口已在上方单独放行）
             .mvcMatchers("/gym/manage/**").hasAnyRole("ADMIN", "RECEPTION")
 
             // 管理端看板/统计：管理员/前台/教练（会员不应访问控制台）

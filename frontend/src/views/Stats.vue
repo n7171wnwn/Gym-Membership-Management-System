@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, nextTick } from "vue";
+import { onMounted, onBeforeUnmount, ref, nextTick } from "vue";
 import * as echarts from "echarts";
 import api from "../api/http";
 
@@ -29,6 +29,11 @@ const revRef = ref(null);
 const heatRef = ref(null);
 let revChart;
 let heatChart;
+
+function handleResize() {
+  revChart?.resize();
+  heatChart?.resize();
+}
 
 async function load() {
   const { data } = await api.get("/manage/stats/charts");
@@ -83,10 +88,13 @@ function renderHeat(rows) {
 
 onMounted(async () => {
   await load();
-  window.addEventListener("resize", () => {
-    revChart?.resize();
-    heatChart?.resize();
-  });
+  window.addEventListener("resize", handleResize);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", handleResize);
+  revChart?.dispose();
+  heatChart?.dispose();
 });
 </script>
 

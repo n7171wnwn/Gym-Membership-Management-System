@@ -16,6 +16,15 @@ export const useAuthStore = defineStore("auth", {
       return state.role === "ROLE_ADMIN" || state.role === "ROLE_RECEPTION";
     },
     canDeleteMember(state) {
+      return state.role === "ROLE_ADMIN";
+    },
+    canManageCoach(state) {
+      return state.role === "ROLE_ADMIN";
+    },
+    canAddCourse(state) {
+      return state.role === "ROLE_ADMIN";
+    },
+    canEditCourse(state) {
       return state.role === "ROLE_ADMIN" || state.role === "ROLE_RECEPTION";
     }
   },

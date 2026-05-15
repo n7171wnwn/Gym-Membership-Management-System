@@ -67,20 +67,32 @@ public class ManageService {
     @CacheEvict(value = {"members", "dashboard"}, allEntries = true)
     @Transactional
     public Member saveMember(Member member) {
-        if (member.getId() == null && (member.getStatus() == null || member.getStatus().isEmpty())) {
-            member.setStatus("NORMAL");
+        Member target = member;
+        if (member.getId() != null) {
+            target = memberRepository.findById(member.getId())
+                .orElseThrow(() -> new RuntimeException("会员不存在"));
+            target.setName(member.getName());
+            target.setPhone(member.getPhone());
+            target.setGoal(member.getGoal());
+            target.setHealthTracking(member.getHealthTracking());
+            target.setExpireDate(member.getExpireDate());
+            target.setLevel(member.getLevel());
+            target.setStatus(member.getStatus());
+            if (member.getFrozenAt() != null) {
+                target.setFrozenAt(member.getFrozenAt());
+            }
         }
-        if (member.getId() == null && (member.getLevel() == null || member.getLevel().isEmpty())) {
-            member.setLevel("Bronze");
+        if (target.getStatus() == null || target.getStatus().isEmpty()) {
+            target.setStatus("NORMAL");
         }
-        if (member.getStatus() == null || member.getStatus().isEmpty()) {
-            member.setStatus("NORMAL");
+        if (target.getId() == null && (target.getLevel() == null || target.getLevel().isEmpty())) {
+            target.setLevel("Bronze");
         }
-        if (!"FROZEN".equals(member.getStatus())) {
-            member.setFrozenAt(null);
+        if (!"FROZEN".equals(target.getStatus())) {
+            target.setFrozenAt(null);
         }
-        normalizeMemberStatus(member);
-        return memberRepository.save(member);
+        normalizeMemberStatus(target);
+        return memberRepository.save(target);
     }
 
     @CacheEvict(value = {"members", "dashboard"}, allEntries = true)

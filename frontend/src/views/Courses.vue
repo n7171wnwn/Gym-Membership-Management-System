@@ -2,7 +2,7 @@
   <el-card class="gym-page-card">
     <template #header>
       <span>{{ auth.isCoach ? "我的课程" : "课程管理" }}</span>
-      <el-button v-if="auth.canFullManage" type="primary" style="float: right" @click="openAdd">新增课程</el-button>
+      <el-button v-if="auth.canAddCourse" type="primary" style="float: right" @click="openAdd">新增课程</el-button>
     </template>
     <el-table :data="list" v-loading="loading" stripe>
       <el-table-column prop="id" label="ID" width="70" />
@@ -21,7 +21,7 @@
       </el-table-column>
       <el-table-column label="操作" width="100" fixed="right">
         <template #default="{ row }">
-          <el-button type="primary" link @click="openEdit(row)">编辑</el-button>
+          <el-button v-if="auth.canEditCourse && !auth.isCoach" type="primary" link @click="openEdit(row)">编辑</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -64,7 +64,7 @@
             <el-option label="私教" value="PRIVATE" />
           </el-select>
         </el-form-item>
-        <el-form-item v-if="auth.canFullManage" label="教练">
+        <el-form-item v-if="auth.canEditCourse" label="教练">
           <el-select v-model="formEdit.coachId" filterable style="width: 100%">
             <el-option v-for="c in coaches" :key="c.id" :label="c.name" :value="c.id" />
           </el-select>
@@ -195,7 +195,7 @@ async function saveEdit() {
       category: formEdit.category,
       enabled: formEdit.enabled
     };
-    if (auth.canFullManage && formEdit.coachId) body.coachId = formEdit.coachId;
+    if (auth.canEditCourse && formEdit.coachId) body.coachId = formEdit.coachId;
     await api.put(`/manage/courses/${formEdit.id}`, body);
     ElMessage.success("已保存");
     dlgEdit.value = false;

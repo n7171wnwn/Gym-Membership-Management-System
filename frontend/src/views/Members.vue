@@ -14,8 +14,8 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="load">查询</el-button>
-          <el-button @click="openCreate">新增会员</el-button>
-          <el-button @click="exportXlsx">导出 Excel</el-button>
+          <el-button v-if="auth.canFullManage" @click="openCreate">新增会员</el-button>
+          <el-button v-if="auth.canFullManage" @click="exportXlsx">导出 Excel</el-button>
         </el-form-item>
       </el-form>
 
@@ -54,10 +54,10 @@
         </el-table-column>
         <el-table-column label="操作" width="300" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link @click="openEdit(row)">编辑</el-button>
-            <el-button v-if="row.status !== 'FROZEN'" type="warning" link @click="freeze(row)">冻结</el-button>
-            <el-button v-else type="success" link @click="unfreeze(row)">恢复</el-button>
-            <el-button type="primary" link @click="openCards(row)">会员卡</el-button>
+            <el-button v-if="auth.canFullManage" type="primary" link @click="openEdit(row)">编辑</el-button>
+            <el-button v-if="auth.canFullManage && row.status !== 'FROZEN'" type="warning" link @click="freeze(row)">冻结</el-button>
+            <el-button v-if="auth.canFullManage && row.status === 'FROZEN'" type="success" link @click="unfreeze(row)">恢复</el-button>
+            <el-button v-if="auth.canFullManage" type="primary" link @click="openCards(row)">会员卡</el-button>
             <el-button v-if="auth.canDeleteMember" type="danger" link @click="del(row)">删除</el-button>
           </template>
         </el-table-column>
@@ -295,16 +295,20 @@ async function saveMember() {
   }
   saving.value = true;
   try {
+    const payload = {
+      ...form,
+      expireDate: form.expireDate || null
+    };
     if (editId.value) {
-      await api.put(`/manage/members/${editId.value}`, { ...form });
+      await api.put(`/manage/members/${editId.value}`, payload);
     } else {
-      await api.post("/manage/members", { ...form });
+      await api.post("/manage/members", payload);
     }
     ElMessage.success("已保存");
     dlgMember.value = false;
     await load();
   } catch (e) {
-    ElMessage.error(e.response?.data?.message || "失败");
+    ElMessage.error(e.response?.data?.message || "保存失败");
   } finally {
     saving.value = false;
   }
@@ -407,7 +411,7 @@ async function doLost(row) {
     await loadCards();
     await load();
   } catch (e) {
-    if (e !== "cancel") ElMessage.error(e.response?.data?.message || " fail");
+    if (e !== "cancel") ElMessage.error(e.response?.data?.message || "挂失失败");
   }
 }
 
