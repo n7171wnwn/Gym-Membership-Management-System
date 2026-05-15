@@ -16,6 +16,8 @@ public class Member {
     private String goal;
     private String healthTracking;
     private LocalDate expireDate;
+    /** 冻结开始日期，恢复时按冻结天数顺延会员卡有效期 */
+    private LocalDate frozenAt;
     private String level;
     /** NORMAL, EXPIRED, FROZEN */
     private String status;
@@ -32,6 +34,8 @@ public class Member {
     public void setHealthTracking(String healthTracking) { this.healthTracking = healthTracking; }
     public LocalDate getExpireDate() { return expireDate; }
     public void setExpireDate(LocalDate expireDate) { this.expireDate = expireDate; }
+    public LocalDate getFrozenAt() { return frozenAt; }
+    public void setFrozenAt(LocalDate frozenAt) { this.frozenAt = frozenAt; }
     public String getLevel() { return level; }
     public void setLevel(String level) { this.level = level; }
     public String getStatus() { return status; }

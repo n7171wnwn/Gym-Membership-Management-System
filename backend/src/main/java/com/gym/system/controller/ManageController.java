@@ -72,6 +72,16 @@ public class ManageController {
         manageService.deleteMember(id);
     }
 
+    @PostMapping("/members/{id}/freeze")
+    public Member freezeMember(@PathVariable Long id) {
+        return manageService.freezeMember(id);
+    }
+
+    @PostMapping("/members/{id}/unfreeze")
+    public Member unfreezeMember(@PathVariable Long id) {
+        return manageService.unfreezeMember(id);
+    }
+
     @GetMapping("/members/{id}/cards")
     public List<MembershipCard> cards(@PathVariable Long id) {
         return manageService.listCardsByMember(id);

@@ -59,7 +59,9 @@ public class ManageService {
     }
 
     public List<Member> searchMembers(String keyword, String status) {
-        return memberRepository.search(emptyToNull(keyword), emptyToNull(status));
+        List<Member> members = memberRepository.search(emptyToNull(keyword), emptyToNull(status));
+        syncMemberStatusesByExpireDate(members);
+        return members;
     }
 
     @CacheEvict(value = {"members", "dashboard"}, allEntries = true)
@@ -71,13 +73,27 @@ public class ManageService {
         if (member.getId() == null && (member.getLevel() == null || member.getLevel().isEmpty())) {
             member.setLevel("Bronze");
         }
+        if (member.getStatus() == null || member.getStatus().isEmpty()) {
+            member.setStatus("NORMAL");
+        }
+        if (!"FROZEN".equals(member.getStatus())) {
+            member.setFrozenAt(null);
+        }
+        normalizeMemberStatus(member);
         return memberRepository.save(member);
     }
 
     @CacheEvict(value = {"members", "dashboard"}, allEntries = true)
     @Transactional
     public void deleteMember(Long id) {
-        memberRepository.deleteById(id);
+        Member member = memberRepository.findById(id).orElseThrow(() -> new RuntimeException("会员不存在"));
+        if (!consumptionRepository.findByMember_IdOrderByCreatedAtDesc(id).isEmpty()) {
+            throw new RuntimeException("该会员有消费记录，不能直接删除，请先保留历史或改为逻辑删除");
+        }
+        if (!membershipCardRepository.findByMemberIdOrderByIdDesc(id).isEmpty()) {
+            throw new RuntimeException("该会员有会员卡记录，不能直接删除，请先保留历史或改为逻辑删除");
+        }
+        memberRepository.delete(member);
     }
 
     public Member getMember(Long id) {
@@ -97,8 +113,10 @@ public class ManageService {
         card.setMember(member);
         card.setCardType(cardType);
         card.setStatus("ACTIVE");
-        card.setValidFrom(LocalDate.now());
-        card.setValidTo(LocalDate.now().plusDays(validDays > 0 ? validDays : 30));
+        int days = validDays > 0 ? validDays : 30;
+        LocalDate from = computeNextCardValidFrom(memberId);
+        card.setValidFrom(from);
+        card.setValidTo(from.plusDays(days));
         if ("COUNT".equals(cardType)) {
             card.setRemainingTimes(remainingTimes != null ? remainingTimes : 0);
             card.setBalance(0.0);
@@ -110,10 +128,12 @@ public class ManageService {
         if (payAmount != null && payAmount > 0) {
             gymService.createConsumption(memberId, "办卡", payAmount);
         }
+        syncMemberExpireFromActiveCards(memberId);
         return saved;
     }
 
     @Transactional
+    @CacheEvict(value = {"members", "dashboard"}, allEntries = true)
     public MembershipCard renewCard(Long cardId, Double payAmount, int extendDays) {
         MembershipCard card = membershipCardRepository.findById(cardId).orElseThrow(() -> new RuntimeException("会员卡不存在"));
         if ("CANCELLED".equals(card.getStatus()) || "LOST".equals(card.getStatus())) {
@@ -125,21 +145,154 @@ public class ManageService {
         if (payAmount != null && payAmount > 0) {
             gymService.createConsumption(card.getMember().getId(), "续费", payAmount);
         }
+        syncMemberExpireFromActiveCards(card.getMember().getId());
         return saved;
     }
 
     @Transactional
+    @CacheEvict(value = {"members", "dashboard"}, allEntries = true)
     public MembershipCard reportLost(Long cardId) {
         MembershipCard card = membershipCardRepository.findById(cardId).orElseThrow(() -> new RuntimeException("会员卡不存在"));
         card.setStatus("LOST");
-        return membershipCardRepository.save(card);
+        MembershipCard saved = membershipCardRepository.save(card);
+        syncMemberExpireFromActiveCards(card.getMember().getId());
+        return saved;
     }
 
     @Transactional
+    @CacheEvict(value = {"members", "dashboard"}, allEntries = true)
     public MembershipCard cancelCard(Long cardId) {
         MembershipCard card = membershipCardRepository.findById(cardId).orElseThrow(() -> new RuntimeException("会员卡不存在"));
         card.setStatus("CANCELLED");
-        return membershipCardRepository.save(card);
+        MembershipCard saved = membershipCardRepository.save(card);
+        syncMemberExpireFromActiveCards(card.getMember().getId());
+        return saved;
+    }
+
+    /**
+     * 新办时间卡接在已有 ACTIVE 卡之后：从「当前 ACTIVE 中最晚 validTo 的次日」起算；
+     * 若该日早于今天（例如旧卡已过期未处理），则从今天起算；无任何 ACTIVE 卡则从今天起算。
+     */
+    private LocalDate computeNextCardValidFrom(Long memberId) {
+        LocalDate today = LocalDate.now();
+        LocalDate latestEnd = null;
+        for (MembershipCard c : membershipCardRepository.findByMemberIdOrderByIdDesc(memberId)) {
+            if (!"ACTIVE".equals(c.getStatus()) || c.getValidTo() == null) {
+                continue;
+            }
+            if (latestEnd == null || c.getValidTo().isAfter(latestEnd)) {
+                latestEnd = c.getValidTo();
+            }
+        }
+        if (latestEnd == null) {
+            return today;
+        }
+        LocalDate candidate = latestEnd.plusDays(1);
+        return candidate.isBefore(today) ? today : candidate;
+    }
+
+    /**
+     * 将会员「到期日」设为当前所有状态为 ACTIVE 的卡中 validTo 的最晚一天；若无有效卡则为 null。
+     */
+    private void syncMemberExpireFromActiveCards(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElse(null);
+        if (member == null) {
+            return;
+        }
+        LocalDate maxTo = null;
+        for (MembershipCard c : membershipCardRepository.findByMemberIdOrderByIdDesc(memberId)) {
+            if ("ACTIVE".equals(c.getStatus()) && c.getValidTo() != null) {
+                if (maxTo == null || c.getValidTo().isAfter(maxTo)) {
+                    maxTo = c.getValidTo();
+                }
+            }
+        }
+        member.setExpireDate(maxTo);
+        normalizeMemberStatus(member);
+        memberRepository.save(member);
+    }
+
+    private void syncMemberStatusesByExpireDate(List<Member> members) {
+        if (members == null || members.isEmpty()) {
+            return;
+        }
+        LocalDate today = LocalDate.now();
+        boolean changed = false;
+        for (Member member : members) {
+            if (normalizeMemberStatus(member, today)) {
+                changed = true;
+            }
+        }
+        if (changed) {
+            memberRepository.saveAll(members);
+        }
+    }
+
+    public Member freezeMember(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new RuntimeException("会员不存在"));
+        if ("FROZEN".equals(member.getStatus())) {
+            return member;
+        }
+        member.setFrozenAt(LocalDate.now());
+        member.setStatus("FROZEN");
+        memberRepository.save(member);
+        return member;
+    }
+
+    public Member unfreezeMember(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new RuntimeException("会员不存在"));
+        if (!"FROZEN".equals(member.getStatus())) {
+            return member;
+        }
+        LocalDate frozenAt = member.getFrozenAt();
+        LocalDate today = LocalDate.now();
+        if (frozenAt != null) {
+            int frozenDays = (int) java.time.temporal.ChronoUnit.DAYS.between(frozenAt, today);
+            if (frozenDays > 0) {
+                extendActiveCards(member.getId(), frozenDays);
+            }
+        }
+        member.setFrozenAt(null);
+        normalizeMemberStatus(member);
+        memberRepository.save(member);
+        return member;
+    }
+
+    private void extendActiveCards(Long memberId, int days) {
+        if (days <= 0) {
+            return;
+        }
+        List<MembershipCard> cards = membershipCardRepository.findByMemberIdOrderByIdDesc(memberId);
+        boolean changed = false;
+        for (MembershipCard c : cards) {
+            if ("ACTIVE".equals(c.getStatus()) && c.getValidTo() != null) {
+                c.setValidTo(c.getValidTo().plusDays(days));
+                changed = true;
+            }
+        }
+        if (changed) {
+            membershipCardRepository.saveAll(cards);
+            syncMemberExpireFromActiveCards(memberId);
+        }
+    }
+
+    private void normalizeMemberStatus(Member member) {
+        normalizeMemberStatus(member, LocalDate.now());
+    }
+
+    private boolean normalizeMemberStatus(Member member, LocalDate today) {
+        if (member == null) {
+            return false;
+        }
+        if ("FROZEN".equals(member.getStatus())) {
+            return false;
+        }
+        LocalDate expireDate = member.getExpireDate();
+        if (expireDate != null && expireDate.isBefore(today) && !"EXPIRED".equals(member.getStatus())) {
+            member.setStatus("EXPIRED");
+            return true;
+        }
+        return false;
     }
 
     @CacheEvict(value = {"courses", "dashboard"}, allEntries = true)

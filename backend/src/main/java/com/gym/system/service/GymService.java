@@ -110,6 +110,9 @@ public class GymService {
         if (course.getEnabled() != null && !course.getEnabled()) {
             throw new RuntimeException("课程已下架");
         }
+        if ("FROZEN".equals(member.getStatus())) {
+            throw new RuntimeException("会员已冻结，冻结期间不可预约");
+        }
         if (!"NORMAL".equals(member.getStatus()) && member.getStatus() != null) {
             throw new RuntimeException("会员状态不可预约：" + member.getStatus());
         }

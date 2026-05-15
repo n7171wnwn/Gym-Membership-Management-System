@@ -16,7 +16,7 @@ export const useAuthStore = defineStore("auth", {
       return state.role === "ROLE_ADMIN" || state.role === "ROLE_RECEPTION";
     },
     canDeleteMember(state) {
-      return state.role === "ROLE_ADMIN";
+      return state.role === "ROLE_ADMIN" || state.role === "ROLE_RECEPTION";
     }
   },
   actions: {
